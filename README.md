@@ -187,6 +187,84 @@ Input → [Liquid Constant] → [Linear Recurrent Unit] → Output
 - **C implementations**: See `.c` files for mathematical details
 
 ---
+## 🧪 Specialized Testing Suite
+
+Because these models utilize **memory-native architectures** and **custom C-compiled backends**, standard unit tests aren't enough.  
+This repository includes **specialized testing scripts** designed to validate the **unique temporal and persistent nature** of these networks.
+
+---
+
+## 🔍 Test Files Overview
+
+| Test File         | Focus Area            | What it Validates |
+|-------------------|----------------------|-------------------|
+| `test_per.py`     | State Persistence     | Ensures models maintain **bit-perfect accuracy** after saving and loading `.bin` files |
+| `test_amrc_1.py`  | Baseline Regression   | Tests the basic **AMRC cell**’s ability to solve standard linear and non-linear mappings |
+| `test_amrc_2.py`  | Temporal Carry        | Validates the **memory carry effect** — checks whether past states influence future predictions |
+| `test_pmrc.py`    | Gated Memory          | Tests **learnable memory gates** and diagnostic outputs (average gate value, memory magnitude) |
+| `test_amn.py`     | Manifold Dynamics     | Focuses on **AMN Liquid Time Constants** and **Associative Memory Manifold health** |
+
+---
+
+## 🛠️ Key Testing Features
+
+### 1. Bit-Perfect Persistence
+
+Unlike standard neural networks, **memory-native models store internal state**, including:
+
+- Memory preservation factor (`β`)
+- Memory update rate (`α`)
+- Hidden memory manifolds
+
+These tests verify that:
+
+- Memory states are captured **exactly** during `save()`
+- Reloaded models produce an **identical R² score** as the original model
+
+---
+
+### 2. Sequential Validation (No-Reset Testing)
+
+For **AMN** and **PMRC**, correct memory flow across time is critical.
+
+- **`reset_memory=False` flag**  
+  Ensures the internal hidden state is carried from training into prediction.
+
+- **Chronological Data Splitting**  
+  Data is split sequentially (not randomly) so the model cannot *peek into the future*.
+
+---
+
+### 3. Diagnostic Monitoring
+
+These tests go beyond simple **pass/fail** checks and actively monitor **memory health**:
+
+- **Manifold Energy**  
+  Detects whether AMN global memory is saturating or collapsing.
+
+- **Liquid Constant (LC) Timescale**  
+  Monitors how Liquid Time Constants adapt to input frequency.
+
+- **Gate Values (PMRC)**  
+  Verifies whether memory gates are genuinely learning to open/close rather than remaining static.
+
+---
+
+## 🚀 How to Run Tests
+
+To run the full validation suite and verify your **local C-compiled backend**, execute:
+
+```bash
+# Run the primary persistence and error-handling test
+python test_per.py
+
+# Run specific architecture benchmarks
+python test_amrc_2.py
+python test_pmrc.py
+python test_amn.py
+```
+
+---
 
 ## 🎨 Example Use Cases
 
