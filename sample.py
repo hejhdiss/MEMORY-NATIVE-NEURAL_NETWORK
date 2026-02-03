@@ -18,7 +18,7 @@ import sys
 
 # Import the unified API
 try:
-    from api import AMRC, PMRC, create_model, get_info
+    from api import AMRC, PMRC, AMN, create_model, get_info
 except ImportError:
     print("Error: Could not import api.py")
     print("Make sure api.py is in the same directory")
@@ -610,8 +610,9 @@ def main():
     print(f"Available models:")
     print(f"  - AMRC: {info['amrc_available']}")
     print(f"  - PMRC: {info['pmrc_available']}")
+    print(f"  - AMN: {info.get('amn_available', False)}")
     
-    if not info['amrc_available'] and not info['pmrc_available']:
+    if not info['amrc_available'] and not info['pmrc_available'] and not info.get('amn_available', False):
         print("\n⚠ ERROR: No models available!")
         print("Please compile the C libraries first.")
         print("See README.md for instructions.")
@@ -627,6 +628,307 @@ def main():
         ("Model Persistence", example_06_model_persistence, info['amrc_available'] or info['pmrc_available']),
         ("Continuous Learning", example_07_continuous_learning, info['pmrc_available']),
         ("Factory Function", example_08_factory_function, info['amrc_available'] and info['pmrc_available']),
+        ("AMN Basic Usage (NEW!)", example_08a_amn_basic, info.get('amn_available', False)),
+        ("AMN Manifold Memory (NEW!)", example_08b_amn_manifold, info.get('amn_available', False)),
+        ("AMN vs AMRC Comparison (NEW!)", example_08c_amn_comparison, info.get('amn_available', False) and info['amrc_available']),
+        ("Memory Effects", example_09_memory_effects, info['amrc_available']),
+        ("Complete Workflow", example_10_complete_workflow, info['pmrc_available']),
+    ]
+    
+    for i, (name, func, available) in enumerate(examples, 1):
+        if available:
+            try:
+                func()
+                input(f"\n[Press Enter to continue to next example...]")
+            except KeyboardInterrupt:
+                print("\n\nInterrupted by user.")
+                break
+            except Exception as e:
+                print(f"\n⚠ Error in example {i}: {e}")
+                import traceback
+                traceback.print_exc()
+        else:
+            print(f"\n⚠ Skipping Example {i} ({name}): Required model not available")
+    
+    # Summary
+    print("\n" + "="*70)
+    print("All Examples Completed!")
+    print("="*70)
+    print("\nYou've seen:")
+    print("  ✓ Basic model creation and training")
+    print("  ✓ Memory state management")
+    print("  ✓ Learnable memory dynamics (PMRC)")
+    print("  ✓ Partial training and transfer learning")
+    print("  ✓ Model persistence and serialization")
+    print("  ✓ Continuous learning workflows")
+    print("  ✓ Complete ML pipeline")
+    
+    print("\nFor more information:")
+    print("  - Read USAGE.md for detailed documentation")
+    print("  - Check api.py for full API reference")
+    print("  - Explore the C implementations for theory")
+    
+    print("\n" + "="*70 + "\n")
+
+
+
+# ============================================================================
+# EXAMPLE 9: Memory Effect Visualization
+# ============================================================================
+
+def example_09_memory_effects():
+    """Demonstrating effect of different memory parameters"""
+    print("\n" + "="*70)
+    print("EXAMPLE 9: Memory Parameter Effects")
+    print("="*70)
+    
+    np.random.seed(42)
+    
+    configs = [
+        ("No memory", 0.0, 0.0),
+        ("Weak memory", 0.2, 0.1),
+        ("Moderate memory", 0.5, 0.2),
+        ("Strong memory", 0.8, 0.3),
+    ]
+    
+    for name, beta, alpha in configs:
+        print(f"\n--- {name} (beta={beta}, alpha={alpha}) ---")
+        
+        model = AMRC(input_size=3, hidden_size=6, output_size=2, beta=beta, alpha=alpha)
+        
+        # Strong initial input
+        strong_input = np.array([[1.0, 1.0, 1.0]], dtype=np.float32)
+        pred = model.predict(strong_input)
+        print(f"  After strong input: {pred[0]}")
+        
+        # Weak subsequent inputs
+        weak_input = np.array([[0.1, 0.1, 0.1]], dtype=np.float32)
+        
+        for step in range(3):
+            pred = model.predict(weak_input)
+            print(f"  After weak input {step+1}:  {pred[0]}")
+        
+        print(f"  → Higher beta = stronger retention of initial signal")
+
+
+# ============================================================================
+# EXAMPLE 10: Complete Workflow
+# ============================================================================
+
+def example_10_complete_workflow():
+    """End-to-end workflow with validation and testing"""
+    print("\n" + "="*70)
+    print("EXAMPLE 10: Complete Machine Learning Workflow")
+    print("="*70)
+    
+    np.random.seed(42)
+    
+    # Generate dataset
+    print("\n1. Generating dataset...")
+    n_samples = 200
+    X = np.random.randn(n_samples, 15).astype(np.float32)
+    y = np.random.randn(n_samples, 8).astype(np.float32)
+    
+    # Split data: 60% train, 20% validation, 20% test
+    n_train = int(0.6 * n_samples)
+    n_val = int(0.2 * n_samples)
+    
+    X_train, y_train = X[:n_train], y[:n_train]
+    X_val, y_val = X[n_train:n_train+n_val], y[n_train:n_train+n_val]
+    X_test, y_test = X[n_train+n_val:], y[n_train+n_val:]
+    
+    print(f"   Train: {X_train.shape[0]} samples")
+    print(f"   Validation: {X_val.shape[0]} samples")
+    print(f"   Test: {X_test.shape[0]} samples")
+    
+    # Create model
+    print("\n2. Creating PMRC model...")
+    model = PMRC(
+        input_size=15,
+        hidden_size=30,
+        output_size=8,
+        beta=0.3,
+        alpha=0.1,
+        use_learnable_gates=True,
+        learning_rate=0.01,
+        random_state=42
+    )
+    
+    # Training
+    print("\n3. Training model...")
+    model.fit(X_train, y_train, epochs=100, verbose=1)
+    
+    # Validation
+    print("\n4. Validating model...")
+    val_score = model.score(X_val, y_val)
+    print(f"   Validation R² score: {val_score:.4f}")
+    
+    # If validation is good, continue; otherwise, retrain
+    if val_score > 0.0:
+        print("   ✓ Validation passed!")
+    else:
+        print("   ⚠ Low validation score, consider retraining")
+    
+    # Testing
+    print("\n5. Testing on unseen data...")
+    test_predictions = model.predict(X_test)
+    test_score = model.score(X_test, y_test)
+    print(f"   Test R² score: {test_score:.4f}")
+    
+    # Model introspection
+    print("\n6. Model summary...")
+    print(f"   Training steps: {model.training_steps}")
+    print(f"   Final loss: {model.last_loss:.6f}")
+    print(f"   Avg memory magnitude: {model.avg_memory_magnitude:.6f}")
+    print(f"   Avg gate value: {model.avg_gate_value:.6f}")
+    
+    # Save model
+    print("\n7. Saving trained model...")
+    model.save('final_model.bin')
+    print("   ✓ Model saved to final_model.bin")
+    
+    print("\n✓ Complete workflow finished successfully!")
+
+def example_08a_amn_basic():
+    """Basic training and prediction with AMN"""
+    print("\n" + "="*70)
+    print("EXAMPLE 8a: AMN Basic Usage")
+    print("="*70)
+    
+    np.random.seed(42)
+    X_train = np.random.randn(100, 10).astype(np.float32)
+    y_train = np.random.randn(100, 5).astype(np.float32)
+    
+    print("\nCreating AMN model...")
+    model = AMN(
+        input_size=10,
+        hidden_size=20,
+        output_size=5,
+        memory_manifold_size=64,
+        learning_rate=0.005
+    )
+    
+    print(f"  Input size: {model.input_size}")
+    print(f"  Hidden size: {model.hidden_size}")
+    print(f"  Manifold size: 64")
+    
+    print("\nTraining AMN...")
+    model.fit(X_train, y_train, epochs=50, verbose=1)
+    
+    # Introspect AMN specific properties
+    print(f"\nModel Diagnostics:")
+    print(f"  Avg LC Timescale: {model.avg_lc_timescale:.4f}")
+    print(f"  Initial Manifold Energy: {model.avg_manifold_energy:.6f}")
+    
+    X_test = np.random.randn(5, 10).astype(np.float32)
+    preds = model.predict(X_test)
+    print(f"\nPrediction shape: {preds.shape}")
+    print("✓ AMN basic cycle complete!")
+    
+    return model
+
+def example_08b_amn_manifold():
+    """Demonstrating AMN Manifold Memory Dynamics"""
+    print("\n" + "="*70)
+    print("EXAMPLE 8b: AMN Manifold Memory")
+    print("="*70)
+    
+    np.random.seed(42)
+    model = AMN(input_size=4, hidden_size=16, output_size=2)
+    
+    print("\nProcessing sequence to observe Manifold Energy...")
+    energies = []
+    
+    for i in range(5):
+        X_step = np.random.randn(1, 4).astype(np.float32)
+        model.predict(X_step)
+        energy = model.avg_manifold_energy
+        energies.append(energy)
+        print(f"  Step {i+1}: Manifold Energy = {energy:.6f}")
+    
+    print("\nResetting memory...")
+    model.reset_memory()
+    print(f"  Energy after reset: {model.avg_manifold_energy:.6f}")
+    
+    print("\n✓ AMN Manifold tracks high-dimensional memory state!")
+
+def example_08c_amn_comparison():
+    """Comparison between AMRC and AMN architectures"""
+    print("\n" + "="*70)
+    print("EXAMPLE 8c: AMN vs AMRC Comparison")
+    print("="*70)
+    
+    np.random.seed(42)
+    X = np.random.randn(150, 12).astype(np.float32)
+    y = np.random.randn(150, 4).astype(np.float32)
+    
+    # Setup models
+    amrc = AMRC(input_size=12, hidden_size=24, output_size=4, beta=0.5)
+    amn = AMN(input_size=12, hidden_size=24, output_size=4)
+    
+    print("\nTraining AMRC...")
+    amrc.fit(X, y, epochs=40, verbose=0)
+    amrc_loss = amrc.last_loss
+    
+    print("Training AMN...")
+    amn.fit(X, y, epochs=40, verbose=0)
+    # Note: AMN doesn't expose last_loss in api.py, we evaluate via score
+    
+    # Test performance
+    X_test = np.random.randn(30, 12).astype(np.float32)
+    y_test = np.random.randn(30, 4).astype(np.float32)
+    
+    score_amrc = amrc.score(X_test, y_test)
+    score_amn = amn.score(X_test, y_test)
+    
+    print(f"\nResults Table:")
+    print(f"{'Model':<10} | {'R² Score':<10}")
+    print("-" * 25)
+    print(f"{'AMRC':<10} | {score_amrc:<10.4f}")
+    print(f"{'AMN':<10} | {score_amn:<10.4f}")
+    
+    print("\n✓ Comparison complete! AMN uses liquid state dynamics for memory.")
+    
+# ============================================================================
+# MAIN RUNNER
+# ============================================================================
+
+def main():
+    """Run all examples"""
+    
+    # Print header
+    print("\n" + "╔" + "="*68 + "╗")
+    print("║" + " "*10 + "Memory-Native Neural Networks API" + " "*25 + "║")
+    print("║" + " "*20 + "Sample Usage Examples" + " "*28 + "║")
+    print("╚" + "="*68 + "╝")
+    
+    # Check API status
+    info = get_info()
+    print(f"\nAPI Version: {info['version']}")
+    print(f"Available models:")
+    print(f"  - AMRC: {info['amrc_available']}")
+    print(f"  - PMRC: {info['pmrc_available']}")
+    print(f"  - AMN: {info.get('amn_available', False)}")
+    
+    if not info['amrc_available'] and not info['pmrc_available'] and not info.get('amn_available', False):
+        print("\n⚠ ERROR: No models available!")
+        print("Please compile the C libraries first.")
+        print("See README.md for instructions.")
+        return
+    
+    # Run examples
+    examples = [
+        ("Basic AMRC Usage", example_01_amrc_basic, info['amrc_available']),
+        ("PMRC Learnable Gates", example_02_pmrc_learnable, info['pmrc_available']),
+        ("Memory Management", example_03_memory_management, info['amrc_available']),
+        ("Partial Training (AMRC)", example_04_partial_training_amrc, info['amrc_available']),
+        ("Advanced Partial Training (PMRC)", example_05_advanced_partial_training, info['pmrc_available']),
+        ("Model Persistence", example_06_model_persistence, info['amrc_available'] or info['pmrc_available']),
+        ("Continuous Learning", example_07_continuous_learning, info['pmrc_available']),
+        ("Factory Function", example_08_factory_function, info['amrc_available'] and info['pmrc_available']),
+        ("AMN Basic Usage (NEW!)", example_08a_amn_basic, info.get('amn_available', False)),
+        ("AMN Manifold Memory (NEW!)", example_08b_amn_manifold, info.get('amn_available', False)),
+        ("AMN vs AMRC Comparison (NEW!)", example_08c_amn_comparison, info.get('amn_available', False) and info['amrc_available']),
         ("Memory Effects", example_09_memory_effects, info['amrc_available']),
         ("Complete Workflow", example_10_complete_workflow, info['pmrc_available']),
     ]
