@@ -115,9 +115,60 @@ def run_pmrc_test():
     else:
         print_status(f"PMRC Load Error: Prediction mismatch (Diff: {diff:.2e})", False)
 
-
 # ---------------------------------------------------------
-# 4. ERROR HANDLING TEST (Mismatch Guards)
+# 4. AMN PERSISTENCE TEST (Liquid Constant & Manifolds)
+# ---------------------------------------------------------
+def run_amn_test():
+    print("\n" + "="*60)
+    print("  PHASE 3: AMN PERSISTENCE & ADAPTIVE DYNAMICS")
+    print("="*60)
+    
+    X, y = get_sample_data(50, INPUT_DIM)
+    
+    print(f"[1/4] Initializing AMN (Manifold={MANIFOLD_SIZE})...")
+    # Note: AMN uses dt and memory_decay parameters
+    a1 = AMN(INPUT_DIM, HIDDEN_DIM, OUTPUT_DIM, 
+             memory_manifold_size=MANIFOLD_SIZE, 
+             dt=0.05)
+    
+    print("Training a1...")
+    a1.fit(X, y, epochs=5, verbose=0)
+    
+    # CRITICAL: Reset memory before capturing 'gold' prediction
+    # This ensures we are testing the WEIGHTS preservation
+    a1.reset_memory() 
+    orig_pred = a1.predict(X)
+    orig_energy = a1.avg_manifold_energy
+    
+    print(f"[2/4] Saving AMN model to {FILENAME_AMN}...")
+    a1.save(FILENAME_AMN)
+
+    print(f"[3/4] Loading into fresh AMN instance...")
+    a2 = AMN(INPUT_DIM, HIDDEN_DIM, OUTPUT_DIM)
+    a2.load(FILENAME_AMN)
+    
+    # Ensure a2 starts with same clean state as a1 did
+    a2.reset_memory() 
+    
+    # Verify Manifold state restoration
+    if abs(a2.avg_manifold_energy - orig_energy) < 1e-6:
+        print_status(f"AMN Manifold Restore: Energy level match ({a2.avg_manifold_energy:.4f})")
+    
+    new_pred = a2.predict(X)
+    diff = np.max(np.abs(orig_pred - new_pred))
+    
+    if diff < 1e-7:
+        print_status(f"AMN Load Success: Predictions match (Max Diff: {diff:.2e})")
+    else:
+        # If this still fails, check that api.py uses: self._model = AMN_Base.load(path)
+        print_status(f"AMN Load Error: Prediction mismatch (Diff: {diff:.2e})", False)
+
+    print("[4/4] Testing Manifold Reset...")
+    a2.reset_memory() 
+    if a2.avg_manifold_energy < 0.01:
+        print_status("AMN Memory Reset: Manifold energy cleared successfully.")
+# ---------------------------------------------------------
+# 5. ERROR HANDLING TEST (Mismatch Guards)
 # ---------------------------------------------------------
 def run_error_handling_test():
     print("\n" + "="*60)
