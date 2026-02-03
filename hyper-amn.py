@@ -10,7 +10,7 @@ Advanced architecture with specialized manifolds:
 Key Innovation: Prevents memory interference by domain separation
 
 Compile C library first:
-    Windows: gcc -shared -o hyper-amn.dll hyper-amn.c -lm -O3 -fopenmp
+    Windows: gcc -shared -o hyper-amn.dll hyper-amn.c -lm -O3 -fopenmp -static-libgcc -static
     Linux:   gcc -shared -fPIC -o hyper-amn.so hyper-amn.c -lm -O3 -fopenmp
     Mac:     gcc -shared -fPIC -o hyper-amn.dylib hyper-amn.c -lm -O3 -Xpreprocessor -fopenmp -lomp
 
