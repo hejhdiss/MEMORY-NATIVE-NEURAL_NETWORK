@@ -96,7 +96,7 @@ model.save('my_memory_model.bin')
 ## 🧬 Independent "Cousin" Architectures
 
 The following models are experimental **"cousins"** of the standard AMN.  
-These are **not included** in the main `api.py` or the unified API wrapper.
+These are **not included** in the main `api.py` or the unified API wrapper(also not included in sample.py and don't have test_*.py).
 
 They are **specialized architectures** that must be used as **standalone `.py` scripts** and require their **own C libraries** to be compiled separately.
 
