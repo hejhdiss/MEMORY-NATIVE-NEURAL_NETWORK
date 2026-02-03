@@ -11,7 +11,7 @@
  * Linux:   gcc -shared -fPIC -o amn.so amn.c -lm -O3 -fopenmp
  * Mac:     gcc -shared -fPIC -o amn.dylib amn.c -lm -O3 -Xpreprocessor -fopenmp -lomp
  * 
- * Licensed under MIT License
+ * Licensed under GPL V3.
  */
 
 #include <stdio.h>
