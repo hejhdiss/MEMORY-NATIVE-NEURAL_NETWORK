@@ -37,12 +37,19 @@ try:
 except ImportError:
     HAS_PMRC = False
     warnings.warn("PMRC base implementation not available. Compile memory_net_extended.c first.")
-
+# Add this near the other imports in api.py
+try:
+    from amn import AdaptiveMemoryNetwork as AMN_Base
+    HAS_AMN = True
+except ImportError:
+    HAS_AMN = False
+    warnings.warn("AMN implementation not found. Ensure amn.py is in the same directory.")
 
 __version__ = "1.0.0"
 __all__ = [
     'AMRC',
     'PMRC',
+    'AMN',
     'MemoryCell',
     'create_model',
 ]
@@ -685,13 +692,83 @@ class PMRC(MemoryCell):
         """Whether output memory is enabled."""
         return self._model.use_output_memory
 
+class AMN(MemoryCell):
+    """
+    Adaptive Memory Network (AMN)
+    
+    Combines Liquid Constant neurons, Linear Recurrent Units, 
+    and Associative Memory Manifolds.
+    """
+    
+    def __init__(self, 
+                 input_size: int,
+                 hidden_size: int,
+                 output_size: int,
+                 memory_manifold_size: int = 64,
+                 learning_rate: float = 0.001,
+                 dt: float = 0.1,
+                 memory_decay: float = 0.995):
+        
+        if not HAS_AMN:
+            raise RuntimeError("AMN implementation not available.")
+        
+        super().__init__("AMN")
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.output_size = output_size
+        
+        self._model = AMN_Base(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            output_size=output_size,
+            memory_manifold_size=memory_manifold_size,
+            learning_rate=learning_rate,
+            dt=dt,
+            memory_decay=memory_decay
+        )
 
+    def fit(self, X: np.ndarray, y: np.ndarray, epochs: int = 100, 
+            batch_size: int = 32, verbose: int = 0, reset_memory: bool = True) -> 'AMN':
+        self._model.fit(X, y, epochs=epochs, batch_size=batch_size, 
+                        verbose=verbose, reset_memory=reset_memory)
+        return self
+
+    def predict(self, X: np.ndarray, reset_memory: bool = False) -> np.ndarray:
+        return self._model.predict(X, reset_memory=reset_memory)
+
+    def reset_memory(self):
+        self._model.reset_memory()
+
+    def get_memory_state(self) -> np.ndarray:
+        """Returns the hidden state (Note: AMN also has a manifold state)"""
+        return self._model.get_hidden_state()
+
+    def set_memory_state(self, memory: np.ndarray):
+        self._model.set_hidden_state(memory)
+
+    def save(self, filepath: str):
+        self._model.save(filepath)
+
+    def load(self, filepath: str):
+        # The AMN class method 'load' returns a new instance, 
+        # so we update the internal reference
+        self._model = AMN_Base.load(filepath)
+
+    # AMN Specific Properties
+    @property
+    def avg_manifold_energy(self) -> float:
+        return self._model.avg_manifold_energy
+
+    @property
+    def avg_lc_timescale(self) -> float:
+        return self._model.avg_lc_timescale
+    
 # ============================================================================
 # CONVENIENCE FUNCTIONS
 # ============================================================================
 
 def create_model(
-    model_type: Literal['amrc', 'pmrc', 'AMRC', 'PMRC'],
+    model_type: Literal['amrc', 'pmrc', 'AMRC', 'PMRC','amn','AMN'],
     input_size: int,
     hidden_size: int,
     output_size: int,
@@ -727,13 +804,14 @@ def create_model(
     >>> model = create_model('pmrc', 10, 20, 5, use_learnable_gates=True)
     """
     model_type = model_type.upper()
-    
     if model_type == 'AMRC':
         return AMRC(input_size, hidden_size, output_size, **kwargs)
     elif model_type == 'PMRC':
         return PMRC(input_size, hidden_size, output_size, **kwargs)
+    elif model_type == 'AMN':
+        return AMN(input_size, hidden_size, output_size, **kwargs)
     else:
-        raise ValueError(f"Unknown model type: {model_type}. Use 'amrc' or 'pmrc'.")
+        raise ValueError(f"Unknown model type: {model_type}")
 
 
 # ============================================================================
@@ -753,10 +831,10 @@ def get_info() -> Dict[str, Any]:
         'version': __version__,
         'amrc_available': HAS_AMRC,
         'pmrc_available': HAS_PMRC,
-        'models': ['AMRC', 'PMRC'],
+        'amn_available': HAS_AMN, # Added
+        'models': ['AMRC', 'PMRC', 'AMN'], # Added
         'description': 'Memory-Native Neural Networks API'
     }
-
 
 if __name__ == "__main__":
     # Print module info when run directly
@@ -768,6 +846,7 @@ if __name__ == "__main__":
     print(f"\nAvailable Models:")
     print(f"  AMRC (Adaptive Memory Recurrent Cell): {info['amrc_available']}")
     print(f"  PMRC (Persistent Memory Recurrent Cell): {info['pmrc_available']}")
+    print(f"  AMN (Adaptive Memory Network): {info['amn_available']}")
     print("\nFor usage examples, see sample.py")
     print("For detailed documentation, see README.md")
     print("="*70 + "\n")
