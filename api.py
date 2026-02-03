@@ -750,9 +750,11 @@ class AMN(MemoryCell):
         self._model.save(filepath)
 
     def load(self, filepath: str):
-        # The AMN class method 'load' returns a new instance, 
-        # so we update the internal reference
-        self._model = AMN_Base.load(filepath)
+        loaded_model = AMN_Base.load(filepath)
+        if (loaded_model.hidden_size != self.hidden_size or 
+        loaded_model.input_size != self.input_size ):
+            raise ValueError(f"Network size mismatch")
+        self._model =loaded_model
 
     # AMN Specific Properties
     @property
