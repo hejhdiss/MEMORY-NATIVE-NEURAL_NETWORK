@@ -93,22 +93,48 @@ model.save('my_memory_model.bin')
 **That's it!** You've just trained a neural network where every neuron has its own internal memory.
 
 ---
-## 🧬 Independent "Cousin" Architectures (AMN)
+## 🧬 Independent "Cousin" Architectures
 
 The following models are experimental **"cousins"** of the standard AMN.  
 These are **not included** in the main `api.py` or the unified API wrapper.
 
 They are **specialized architectures** that must be used as **standalone `.py` scripts** and require their **own C libraries** to be compiled separately.
 
-You can use these externally by referencing their specific source files:
+---
 
-- `hyper-amn.py`
-- `sgw-amn.py`
-- `ndm.py`
+## 1. DTPN (Dual-Track Persistence Network)
+
+### Architecture — *The "Universal Persistence" Hybrid*
+
+DTPN is the most comprehensive memory model in the collection.  
+It bridges the gap between the standard AMN and Extended Memory-Native concepts by providing **three distinct layers of data retention**:
+
+- **Track 1: The Echo**  
+  *Memory-Preserving Activation*  
+  Retains a fraction of the immediate previous output (`β` factor) for temporal fluidity.
+
+- **Track 2: The State**  
+  *Stateful Neurons*  
+  Individual neurons maintain a decaying internal **reservoir** of information (`α` factor).
+
+- **Track 3: The Manifold**  
+  *Global Memory Matrix*  
+  A shared **associative whiteboard** for long-term contextual memory.
+
+### Python API (`dtpn.py`)
+- Provides a `DualTrackPersistenceNetwork` class
+- Interfaces with `dtpn.dll` / `dtpn.so`
+- **Configurable persistence** across all three tracks (Echo, State, Matrix)
+
+### Use Case
+Ideal for complex temporal tasks where the network must remember:
+- short-term fluctuations (“jitters”)
+- medium-term state
+- long-term factual context simultaneously
 
 ---
 
-## 1. Hyper-AMN (Multi-Head Associative Manifold)
+## 2. Hyper-AMN (Multi-Head Associative Manifold)
 
 ### Architecture
 Features a specialized **multi-head system** where different *manifolds* track specific data domains:
@@ -118,13 +144,12 @@ Features a specialized **multi-head system** where different *manifolds* track s
 - **Logical Manifold** – Reasoning and causal patterns  
 
 ### Python API (`hyper-amn.py`)
-- Provides a `HyperAMN` class that interfaces with `hyper-amn.dll` / `hyper-amn.so`
 - Includes a **Head Gating Mechanism** to route information to the most relevant manifold
 - Supports `get_head_activations()` to monitor which specialized manifold is currently dominant
 
 ---
 
-## 2. SGW-AMN (Sparse Global Workspace)
+## 3. SGW-AMN (Sparse Global Workspace)
 
 ### Architecture
 Inspired by **Global Workspace Theory** of consciousness.
@@ -134,28 +159,35 @@ Inspired by **Global Workspace Theory** of consciousness.
 - **Attention by Compression** – Forces extraction of essential features
 
 ### Python API (`sgw-amn.py`)
-- Provides a `SparseGlobalWorkspace` class
-- Includes:
-  - `get_workspace_sparsity()`  
+- Provides:
+  - `get_workspace_sparsity()`
   - `get_competition_entropy()` to measure routing competition
-- Features an **information bottleneck rate** statistic showing the compression ratio
+- Includes an **information bottleneck rate** statistic showing the compression ratio
 
 ---
 
-## 3. NDM (Neural Differential Manifolds)
+## 4. NDM (Neural Differential Manifolds)
 
 ### Architecture
 Implements **Continuous Weight Evolution** using **Ordinary Differential Equations (ODEs)**.
 
-- Instead of static weights, `dW/dt` is computed based on data importance
-- **True Neuroplasticity** – The network rewires itself in real time
+- **True Neuroplasticity** – Weights evolve in real time (`dW/dt`) based on data importance
 - **Hebbian Traces** – “Neurons that fire together wire together” guide weight evolution
 
 ### Python API (`ndm.py`)
-- Provides a `NeuralDifferentialManifold` class
-- Includes:
-  - `get_avg_weight_velocity()` to track network rewiring speed
-  - `get_avg_plasticity()` to measure how fluid or rigid the learning state is
+- Includes `get_avg_weight_velocity()` to track rewiring speed
+- Includes `get_avg_plasticity()` to measure how fluid or rigid the learning state is
+
+---
+
+## Summary of Differences
+
+| Architecture | Key Innovation | Best For |
+|-------------|---------------|----------|
+| **DTPN** | Echo + State + Manifold | Maximum data persistence across all time scales |
+| **Hyper-AMN** | Multi-Head Manifolds | Categorical separation (Logic vs Emotion vs Space) |
+| **SGW-AMN** | Competitive Bottleneck | Feature extraction and “conscious” focus |
+| **NDM** | ODE-based Weight Evolution | Environments with constantly changing rules |
 
 ---
 
