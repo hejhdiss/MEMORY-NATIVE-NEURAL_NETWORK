@@ -93,6 +93,71 @@ model.save('my_memory_model.bin')
 **That's it!** You've just trained a neural network where every neuron has its own internal memory.
 
 ---
+## 🧬 Independent "Cousin" Architectures (AMN)
+
+The following models are experimental **"cousins"** of the standard AMN.  
+These are **not included** in the main `api.py` or the unified API wrapper.
+
+They are **specialized architectures** that must be used as **standalone `.py` scripts** and require their **own C libraries** to be compiled separately.
+
+You can use these externally by referencing their specific source files:
+
+- `hyper-amn.py`
+- `sgw-amn.py`
+- `ndm.py`
+
+---
+
+## 1. Hyper-AMN (Multi-Head Associative Manifold)
+
+### Architecture
+Features a specialized **multi-head system** where different *manifolds* track specific data domains:
+
+- **Spatial Manifold** – Positional and structural patterns  
+- **Emotional Manifold** – Sentiment and tone patterns  
+- **Logical Manifold** – Reasoning and causal patterns  
+
+### Python API (`hyper-amn.py`)
+- Provides a `HyperAMN` class that interfaces with `hyper-amn.dll` / `hyper-amn.so`
+- Includes a **Head Gating Mechanism** to route information to the most relevant manifold
+- Supports `get_head_activations()` to monitor which specialized manifold is currently dominant
+
+---
+
+## 2. SGW-AMN (Sparse Global Workspace)
+
+### Architecture
+Inspired by **Global Workspace Theory** of consciousness.
+
+- Uses a tiny **"conscious" bottleneck** where thousands of neurons compete
+- **Competitive Routing** – Only the most vital information survives compression
+- **Attention by Compression** – Forces extraction of essential features
+
+### Python API (`sgw-amn.py`)
+- Provides a `SparseGlobalWorkspace` class
+- Includes:
+  - `get_workspace_sparsity()`  
+  - `get_competition_entropy()` to measure routing competition
+- Features an **information bottleneck rate** statistic showing the compression ratio
+
+---
+
+## 3. NDM (Neural Differential Manifolds)
+
+### Architecture
+Implements **Continuous Weight Evolution** using **Ordinary Differential Equations (ODEs)**.
+
+- Instead of static weights, `dW/dt` is computed based on data importance
+- **True Neuroplasticity** – The network rewires itself in real time
+- **Hebbian Traces** – “Neurons that fire together wire together” guide weight evolution
+
+### Python API (`ndm.py`)
+- Provides a `NeuralDifferentialManifold` class
+- Includes:
+  - `get_avg_weight_velocity()` to track network rewiring speed
+  - `get_avg_plasticity()` to measure how fluid or rigid the learning state is
+
+---
 
 ## 🚀 Try It Out!
 
