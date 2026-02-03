@@ -4,6 +4,7 @@ AMRC/PMRC PERSISTENCE & PARTIAL TRAINING TEST (FIXED)
 ========================================================
 Validates bit-perfect state restoration and partial training
 compatibility with api.py.
+Licensed under GPL V3.
 """
 
 import numpy as np
