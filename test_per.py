@@ -10,7 +10,7 @@ Licensed under GPL V3.
 import numpy as np
 import os
 import time
-from api import AMRC, PMRC
+from api import AMRC, PMRC,AMN
 
 # ---------------------------------------------------------
 # 1. SETUP & CONFIGURATION
@@ -21,6 +21,8 @@ OUTPUT_DIM = 1
 BETA_VAL = 0.96
 FILENAME_AMRC = "model_amrc_512.bin"
 FILENAME_PMRC = "model_pmrc_512.bin"
+FILENAME_AMN = "model_amn_512.bin"
+MANIFOLD_SIZE = 32
 
 def print_status(msg, success=True):
     symbol = "✅" if success else "❌"
@@ -113,6 +115,7 @@ def run_pmrc_test():
     else:
         print_status(f"PMRC Load Error: Prediction mismatch (Diff: {diff:.2e})", False)
 
+
 # ---------------------------------------------------------
 # 4. ERROR HANDLING TEST (Mismatch Guards)
 # ---------------------------------------------------------
@@ -156,11 +159,21 @@ def run_error_handling_test():
         print_status("Failed to catch missing file!", False)
     except Exception:
         print_status("Caught Expected IO Error.")
+
+
+    # 4. AMN Mismatch
+    print("[Scenario: Loading 512-dim AMN file into 128-dim model]")
+    a_wrong = AMN(INPUT_DIM, 128, OUTPUT_DIM)
+    try:
+        a_wrong.load(FILENAME_AMN)
+        print_status("Failed to catch AMN size mismatch!", False)
+    except Exception as e:
+        print_status(f"Caught Expected AMN Size Mismatch: {str(e)[:50]}...")
 # ---------------------------------------------------------
 # 5. EXECUTION
 # ---------------------------------------------------------
 def cleanup():
-    for f in [FILENAME_AMRC, FILENAME_PMRC]:
+    for f in [FILENAME_AMRC, FILENAME_PMRC, FILENAME_AMN]:
         if os.path.exists(f):
             try: os.remove(f)
             except: pass
@@ -170,6 +183,7 @@ if __name__ == "__main__":
     try:
         run_amrc_test()
         run_pmrc_test()
+        run_amn_test()
         run_error_handling_test()
     except Exception as e:
         print(f"\nFATAL TEST ERROR: {e}")
