@@ -608,6 +608,8 @@ class PMRC(MemoryCell):
             Serialization method: 'custom', 'joblib', or 'pickle'
         """
         loaded = PMRC_Base.load_model(filepath, method=method)
+        if (loaded.hidden_size != self._model.hidden_size) or (loaded.input_size != self._model.input_size) or (loaded.output_size != self._model.output_size):
+            raise ValueError("Network size mismatch")
         self._model = loaded
     
     # Properties
