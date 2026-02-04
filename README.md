@@ -179,6 +179,30 @@ Implements **Continuous Weight Evolution** using **Ordinary Differential Equatio
 - Includes `get_avg_plasticity()` to measure how fluid or rigid the learning state is
 
 ---
+## 3. NDM-Momentum (Momentum-Damped NDM)
+
+**Architecture — The "Stabilized Plasticity" Model**  
+NDM-Momentum introduces a Velocity Manifold to the weight evolution process. Instead of weights changing instantly based on the current derivative ($dW/dt$), the change is filtered through a momentum buffer:
+
+$$
+V(t+1) = \beta \cdot V(t) + \alpha \cdot \frac{dW}{dt}
+$$
+
+$$
+W(t+1) = W(t) + V(t+1)
+$$
+
+This creates a "physical mass" effect for the neural connections, where the network's rewiring becomes smoother and less prone to catastrophic interference or noisy oscillations.
+
+**Python API (`ndm_momentum.py`)**  
+- Provides `NeuralDifferentialManifold` class.  
+- Includes `get_avg_weight_velocity()` to monitor the kinetic energy of rewiring.  
+- Includes `momentum` property (settable $\beta$) to tune the "inertia" of learning.
+
+**Best For:**  
+High-stakes adaptive learning where stability and smooth convergence are as important as plasticity.
+
+---
 
 ## Summary of Differences
 
@@ -188,6 +212,7 @@ Implements **Continuous Weight Evolution** using **Ordinary Differential Equatio
 | **Hyper-AMN** | Multi-Head Manifolds | Categorical separation (Logic vs Emotion vs Space) |
 | **SGW-AMN** | Competitive Bottleneck | Feature extraction and “conscious” focus |
 | **NDM** | ODE-based Weight Evolution | Environments with constantly changing rules |
+| **NDM-Momentum** | Velocity-Damped Plasticity	| Stable, smooth adaptation in volatile environments |
 
 ---
 
@@ -617,4 +642,5 @@ If you find this project interesting, please give it a star! It helps others dis
 ---
 
 **Built with curiosity, powered by Claude Sonnet 4.5, driven by the question:**
+
 > *What if memory wasn't something we added to neural networks, but something that was already there, waiting to be discovered?*
