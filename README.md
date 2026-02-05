@@ -168,6 +168,8 @@ Inspired by **Global Workspace Theory** of consciousness.
 
 ## 4. NDM (Neural Differential Manifolds)
 
+> If you wnat to use clamped version use rename and use ndm_.c to ndm.c
+
 ### Architecture
 Implements **Continuous Weight Evolution** using **Ordinary Differential Equations (ODEs)**.
 
@@ -644,3 +646,4 @@ If you find this project interesting, please give it a star! It helps others dis
 **Built with curiosity, powered by Claude Sonnet 4.5, driven by the question:**
 
 > *What if memory wasn't something we added to neural networks, but something that was already there, waiting to be discovered?*
+
